@@ -79,20 +79,18 @@ GROUP BY total_orders
 
 ```
 
-Q3 Code: Most sold candy first quarter of 2022
+Q3_1 Code: Most sold candy first quarter of 2022
 
 ```{sql, connection = con_chocolate, output.var = "Q3_1"}
-SELECT candy_names AS Candy , COUNT(*) AS number_of_times
+SELECT candy_names AS Candy , SUM(orders.amount), orders.pid
 FROM products INNER JOIN orders USING (pid)
 WHERE orders.sale_date BETWEEN '2022-01-01' AND '2022-3-31'
 GROUP BY products.pid
 ORDER BY COUNT(*) DESC
-LIMIT 1
 ```
 
-The most sold candy in the first quarter of 2022 is *Coconut Crave*
 
-Q3 Code: Name of the sales rep that sold the most of those candy bars in the second quarter of 2022
+Q3_2 Code: Name of the sales rep that sold the most of those candy bars in the second quarter of 2022
 
 ```{sql, connection = con_chocolate, output.var = "Q3_2"}
 SELECT salesreps.Name , COUNT (*) AS number_of_times
@@ -103,4 +101,22 @@ ORDER BY COUNT (*) DESC
 LIMIT 1
 ```
 
-Name of the sales rep that sold the most of those candy bars in the second quarter of 2022 is *Dustin Prestel*
+
+Q3 Final Code:
+
+```{sql, connection = con_chocolate, output.var = "Q3"}
+SELECT q3_1.Candy , salesreps.Name , q3_1.total_amount
+FROM (SELECT candy_names AS Candy , SUM(orders.amount) AS total_amount, orders.pid
+FROM products INNER JOIN orders USING (pid)
+WHERE orders.sale_date BETWEEN '2022-01-01' AND '2022-3-31'
+GROUP BY products.pid
+ORDER BY COUNT(*) DESC) 
+AS q3_1 INNER JOIN orders USING (pid) INNER JOIN salesreps USING (srid)
+WHERE orders.sale_date BETWEEN '2022-04-01' AND '2022-06-30'
+GROUP BY q3_1.Candy, salesreps.Name
+ORDER BY total_amount DESC
+LIMIT 1;
+
+```
+
+The most sold candy in the first quarter of 2022 is *Coconut Crave*, and the name of the sales rep that sold the most of those candy bars in the second quarter of 2022 is *Aragon, Ashley*
